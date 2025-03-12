@@ -8,7 +8,7 @@ model.Xtree{end+1} = plux(eye(3), [1, 0,0]);
 NB = model.NB;
 
 T = 1;
-N = 20;
+N = 50;
 DT = T / N;
 
 opti = casadi.Opti();
@@ -36,6 +36,8 @@ P_end = [pi/2; pi/2; 0;];
 
 opti.subject_to(x(1:3, 1) == P_init)
 opti.subject_to(x(1:3, end) == P_end)
+
+opti.minimize(V)
 
 sol = opti.solve();
 
