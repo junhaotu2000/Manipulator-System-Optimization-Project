@@ -15,8 +15,9 @@ rotInertia = [[0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]];
 mass = [1.0, 1.0, 1.0];
 model = create3DoFRobotModel(rotInertia, mass);
 
+tic
 [x, u] = opti_fun(rotInertia, mass);
-
+toc
 
 X_opt = full(x);
 U_opt = full(u);

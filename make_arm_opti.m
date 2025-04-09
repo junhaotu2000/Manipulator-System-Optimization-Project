@@ -44,7 +44,7 @@ end
 
 %% 5) Boundary Conditions
 q_init = [0;  0;  0]; 
-q_goal = [pi/2;  0;  pi/2];
+q_goal = [pi/2;  pi/4;  0];
 
 opti.subject_to( x(1:NB,1)   == q_init );
 opti.subject_to( x(1:NB,end) == q_goal );
