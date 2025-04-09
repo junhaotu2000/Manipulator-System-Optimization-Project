@@ -36,7 +36,7 @@ function model = create3DoFRobotModel(rotInertia_arr, mass)
         error('mass and rotInertia must contain 3 elements each!');
     end
     
-    L = [-0.1, 0, .5,.5];                  % Link length (adjustable)
+    % L = [-0.1, 0, .5,.5];                  % Link length (adjustable)
     twist_angles = [0, pi/2, pi/2];  % Twist angles for each joint
     
     model.NB = NB;

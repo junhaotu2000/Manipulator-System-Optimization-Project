@@ -35,7 +35,7 @@ p3 = plot(time_grid, Q_opt(3,:), 'LineWidth',1.5);
 xlabel('Time (s)'); ylabel('Angle (rad)');
 title('Joint Angles'); grid on;
 
-subplot(1,3,2); % Joint Velocities
+subplot(1,3,2); % Joint Velocities=
 plot(time_grid, dQ_opt(1,:), 'LineWidth',1.5); hold on;
 plot(time_grid, dQ_opt(2,:), 'LineWidth',1.5);
 plot(time_grid, dQ_opt(3,:), 'LineWidth',1.5);

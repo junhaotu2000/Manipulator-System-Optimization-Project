@@ -73,9 +73,8 @@ function [rotInertia_arr, mass_out] = MechOptimization()
         % Call the mechanical subsystem model to obtain output parameters (including D, t, L, and each link's actual mass)
         [~, mechOut] = mechanicalModel(x_opt);
         fprintf('Optimal Material Vector (material selection indices): %s\n', mat2str(mechOut.m));
-        disp(mechOut.linkInertias);
         fprintf('Individual link masses (kg): %s\n\n', mat2str(mechOut.linkMasses));
-        
+        fprintf('Individual link lengths (mm): %s\n\n', mat2str(mechOut.L));
         results{i,1} = x_opt;
         results{i,2} = fval_opt;
     end
@@ -93,6 +92,7 @@ function [rotInertia_arr, mass_out] = MechOptimization()
     disp(rotInertia_arr);
     disp('mass_out (link masses in kg):');
     disp(mass_out);
+    fprintf('Individual link lengths (mm): %s\n\n', mat2str(mechOut.L));
 
 end
 
