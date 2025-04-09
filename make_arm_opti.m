@@ -14,7 +14,6 @@ opti = casadi.Opti();
 
 inertias = opti.parameter(3,3);
 masses = opti.parameter(3);
-
 model = create3DoFRobotModel(inertias, masses);
 NB = model.NB;  % Number of joints
 disp(['Robot has NB = ', num2str(NB), ' joints.']);
