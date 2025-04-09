@@ -8,9 +8,14 @@ T = 2.0;   % Total duration (2 seconds)
 N = 100;   % Number of time steps
 DT = T / N;
 time_grid = linspace(0, T, N);
-model = make_model(0, 0);
+% Define each link's rotational inertia (using diagonal matrices)
+rotInertia = [[0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]];
 
-[x, u] = opti_fun(0, 0);
+% Define link masses (vector with 3 elements)
+mass = [1.0, 1.0, 1.0];
+model = create3DoFRobotModel(rotInertia, mass);
+
+[x, u] = opti_fun(rotInertia, mass);
 
 
 X_opt = full(x);

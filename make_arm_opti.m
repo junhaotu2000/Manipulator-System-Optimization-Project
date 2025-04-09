@@ -12,10 +12,10 @@ time_grid = linspace(0, T, N);
 %% 3) Create CasADi Optimization Problem
 opti = casadi.Opti();
 
-inertias = opti.parameter(3);
+inertias = opti.parameter(3,3);
 masses = opti.parameter(3);
 
-model = make_model(inertias, masses);
+model = create3DoFRobotModel(inertias, masses);
 NB = model.NB;  % Number of joints
 disp(['Robot has NB = ', num2str(NB), ' joints.']);
 
