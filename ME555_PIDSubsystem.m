@@ -27,49 +27,6 @@ I_func = 1 + 0.5*sin(t);  % Example: Fluctuating inertia
 tau_ext_func = t; % Example: External torque variations
 %tau_ext_func = 0.7;
 
-
-
-%% PID Controller Simulation Function
-function [RMSE, q, error] = pid_simulation(K, qd_desired, I_func, tau_ext_func, dt, N, q_res, tau_max)
-    Kp = K(1); Ki = K(2); Kd = K(3);
-    
-    % Initialize state variables
-    q = zeros(1, N);
-    dq = zeros(1, N);
-    integral_error = 0;
-    
-    % PID control loop with fixed indexing
-    for k = 3:N
-        error = qd_desired(k) - q(k-1);
-        integral_error = integral_error + error * dt;
-        
-        % Compute derivative of error correctly
-        derivative_error = (qd_desired(k) - q(k-1) - (qd_desired(k-1) - q(k-2))) / dt;
-        
-        % PID control law
-        tau = Kp * error + Ki * integral_error + Kd * derivative_error;
-        
-        % Apply torque limit
-        tau = max(min(tau, tau_max), -tau_max);
-        
-        % System dynamics: I(t) * d²q/dt² = τ - τ_ext
-        I_k = I_func(k);
-        tau_ext_k = tau_ext_func(k);
-        ddq = (tau - tau_ext_k) / I_k;
-        
-        % Numerical integration (Euler method)
-        dq(k) = dq(k-1) + ddq * dt;
-        q(k) = q(k-1) + dq(k) * dt;
-        
-        % Enforce angular position resolution constraint
-        %q(k) = round(q(k) / q_res) * q_res;
-    end
-    
-    % Compute RMSE
-    error = qd_desired - q;
-    RMSE = sqrt((1/N) * sum(error.^2))
-end
-
 %% Optimization Setup
 % Define objective function
 objective = @(K) pid_simulation(K, qd_desired, I_func, tau_ext_func, dt, N, q_res, tau_max);
@@ -146,4 +103,45 @@ function [c, ceq] = phase_margin_constraint(K)
     
     % Debugging: Display phase margin
     fprintf('Phase Margin: %.2f° (Constraint: <= 45°)\n', phi_m);
+end
+
+%% PID Controller Simulation Function
+function [RMSE, q, error] = pid_simulation(K, qd_desired, I_func, tau_ext_func, dt, N, q_res, tau_max)
+    Kp = K(1); Ki = K(2); Kd = K(3);
+    
+    % Initialize state variables
+    q = zeros(1, N);
+    dq = zeros(1, N);
+    integral_error = 0;
+    
+    % PID control loop with fixed indexing
+    for k = 3:N
+        error = qd_desired(k) - q(k-1);
+        integral_error = integral_error + error * dt;
+        
+        % Compute derivative of error correctly
+        derivative_error = (qd_desired(k) - q(k-1) - (qd_desired(k-1) - q(k-2))) / dt;
+        
+        % PID control law
+        tau = Kp * error + Ki * integral_error + Kd * derivative_error;
+        
+        % Apply torque limit
+        tau = max(min(tau, tau_max), -tau_max);
+        
+        % System dynamics: I(t) * d²q/dt² = τ - τ_ext
+        I_k = I_func(k);
+        tau_ext_k = tau_ext_func(k);
+        ddq = (tau - tau_ext_k) / I_k;
+        
+        % Numerical integration (Euler method)
+        dq(k) = dq(k-1) + ddq * dt;
+        q(k) = q(k-1) + dq(k) * dt;
+        
+        % Enforce angular position resolution constraint
+        %q(k) = round(q(k) / q_res) * q_res;
+    end
+    
+    % Compute RMSE
+    error = qd_desired - q;
+    RMSE = sqrt((1/N) * sum(error.^2))
 end
