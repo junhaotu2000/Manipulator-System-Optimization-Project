@@ -16,7 +16,7 @@
 % end
 % %% Function Definitions
 % 
-function model = create3DoFRobotModel(D, t, L, m)
+function model = create3DoFRobotModel(rotInertia_arr, mass)
     % create3DoFRobotModel constructs a 3-DOF robot model using spatical v2.
     %
     % Inputs:
@@ -30,7 +30,6 @@ function model = create3DoFRobotModel(D, t, L, m)
     %             jtype  : Joint types (all 'Rz')
     %             Xtree  : Cell array of fixed transforms (6x6 matrices)
     %             I      : Cell array of spatial inertias (6x6 matrices)
-    [rotInertia_arr, mass] = convertLinkParams(D, t, L, m)
     rotInertia = {diag(rotInertia_arr(1,:)),diag(rotInertia_arr(2,:)),diag(rotInertia_arr(3,:))};
     NB = 3;
     if length(mass) ~= NB || length(rotInertia) ~= NB
@@ -109,57 +108,3 @@ function X = plux(R, p)
     X = [R, zeros(3); 
          skew(p)*R, R];
 end
-
-function [rotInertia_arr, mass_out] = convertLinkParams(D, t, L, m)
-    % convertLinkParams converts cylinder parameters for each link into rotational
-    % inertia and mass inputs for create3DoFRobotModel.
-    %
-    % Inputs:
-    %   D - 1x3 vector of diameters for each link.
-    %   t - 1x3 vector of wall thicknesses for each link.
-    %   L - 1x3 vector of lengths for each link.
-    %   m - 1x3 vector of masses for each link.
-    %
-    % Outputs:
-    %   rotInertia_arr - 3x3 matrix where each column is the vector
-    %                    [I_x; I_y; I_z] for the corresponding link.
-    %   mass_out       - 1x3 mass vector (same as input m).
-    %
-    % For a cylinder oriented along its x-axis (the link's length direction):
-    %   r_outer = D/2
-    %   r_inner = D/2 - t
-    %   I_x = 0.5 * m * (r_outer^2 + r_inner^2)           % about the longitudinal axis (x)
-    %   I_y = I_z = (1/12) * m * (3*(r_outer^2 + r_inner^2) + L^2)  % about the y and z axes
-    %
-    % Example:
-    %   D = [0.1, 0.1, 0.1];
-    %   t = [0.005, 0.005, 0.005];
-    %   L = [0.5, 0.5, 0.5];
-    %   m = [1, 1, 1];
-    %   [rotInertia_arr, mass_out] = convertLinkParams(D, t, L, m);
-    %
-    %   Then call:
-    %       model = create3DoFRobotModel(rotInertia_arr, mass_out);
-    
-        if numel(D) ~= 3 || numel(t) ~= 3 || numel(L) ~= 3 || numel(m) ~= 3
-            error('All input vectors D, t, L, and m must contain exactly 3 elements!');
-        end
-    
-        rotInertia_arr = zeros(3, 3);
-        mass_out = m;
-    
-        for i = 1:3
-            r_outer = D(i) / 2;
-            r_inner = r_outer - t(i);
-            if r_inner < 0
-                error('For link %d, the wall thickness is too large, resulting in a negative inner radius!', i);
-            end
-    
-            I_x = 0.5 * m(i) * (r_outer^2 + r_inner^2);
-            I_trans = (1/12) * m(i) * (3*(r_outer^2 + r_inner^2) + L(i)^2);  % I_y and I_z are equal
-            
-            rotInertia_arr(:, i) = [I_x; I_trans; I_trans];
-        end
-    end
-    
-    
