@@ -85,7 +85,7 @@ function [rotInertia_arr, mass_out, L] = MechOptimization()
     [~, mechOut] = mechanicalModel(best_x);
     % Note: convertLinkParams expects D, t, L in mm and mass in kg.
     %       Here we use the actual link masses computed by the mechanical subsystem.
-    [rotInertia_arr, mass_out] = convertLinkParams(mechOut.D, mechOut.t, mechOut.L, mechOut.linkMasses);
+    [rotInertia_arr, mass_out,I_trans_arr] = convertLinkParams(mechOut.D, mechOut.t, mechOut.L, mechOut.linkMasses);
     
     %% Display Final Outputs
     fprintf('\nFinal Outputs:\n');
@@ -93,8 +93,9 @@ function [rotInertia_arr, mass_out, L] = MechOptimization()
     disp(rotInertia_arr);
     disp('mass_out (link masses in kg):');
     disp(mass_out);
-    fprintf('Individual link lengths (mm): %s\n\n', mat2str(mechOut.L));
-
+    disp('Scalar form of rotational inertia in kg*mm^2: ');
+    disp(I_trans_arr);
+    
 end
 
 %% ----------------- Subfunctions Section ------------------
@@ -221,7 +222,7 @@ function [c, ceq] = nonlcon(x)
     ceq = [];
 end
 
-function [rotInertia_arr, mass_out] = convertLinkParams(D, t, L, m)
+function [rotInertia_arr, mass_out,I_trans_arr] = convertLinkParams(D, t, L, m)
     % convertLinkParams computes the rotational inertia and mass for each link based on cylindrical parameters.
     %
     % Inputs:
@@ -253,6 +254,7 @@ function [rotInertia_arr, mass_out] = convertLinkParams(D, t, L, m)
         I_x = 0.5 * m(i) * (r_outer^2 + r_inner^2);
         I_trans = (1/12) * m(i) * (3*(r_outer^2 + r_inner^2) + L(i)^2);
         rotInertia_arr(:, i) = [I_x; I_trans; I_trans];
+        I_trans_arr(i) = I_trans;
     end
 end
 
