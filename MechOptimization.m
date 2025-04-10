@@ -1,4 +1,4 @@
-function [rotInertia_arr, mass_out] = MechOptimization()
+function [rotInertia_arr, mass_out, L] = MechOptimization()
 % runOptimizedMechanicalArm integrates the GA optimization and inertia calculation for the mechanical subsystem.
 %
 % Outputs:
@@ -78,6 +78,7 @@ function [rotInertia_arr, mass_out] = MechOptimization()
         results{i,1} = x_opt;
         results{i,2} = fval_opt;
     end
+    L = mechOut.L;
 
     %% 3. Calculate Rotational Inertia Matrix and Link Mass Vector
     % Retrieve the optimal design parameters from the mechanical subsystem model

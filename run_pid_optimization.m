@@ -1,8 +1,8 @@
-function RMSE_final = run_pid_optimization(I_func, tau_ext_func, qd_desired)
+function [RMSE_final, q] = run_pid_optimization(I_func, tau_ext_func, qd_desired)
 
     %% Simulation Parameters
-    T = 10;           % Total simulation time (s)
-    dt = 1e-3;        % Temporal resolution (1 ms)
+    T = 2;           % Total simulation time (s)
+    dt = 2/100;        % Temporal resolution (1 ms)
     N = T/dt;         % Number of discrete time steps
     q_res = 0.18;     % Angular position resolution (rad)
     tau_max = 300;    % Actuator torque limit (Nm)

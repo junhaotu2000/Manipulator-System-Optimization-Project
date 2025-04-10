@@ -14,7 +14,8 @@ opti = casadi.Opti();
 
 inertias = opti.parameter(3,3);
 masses = opti.parameter(3);
-model = create3DoFRobotModel(inertias, masses);
+lengths = opti.parameter(3);
+model = create3DoFRobotModel(inertias, masses, lengths);
 NB = model.NB;  % Number of joints
 disp(['Robot has NB = ', num2str(NB), ' joints.']);
 
@@ -53,8 +54,8 @@ opti.subject_to( x(NB+1:end,1)   == 0 );
 opti.subject_to( x(NB+1:end,end) == 0 );
 
 %% 6) Physical Constraints
-max_torque = 15;  % Max joint torque ±15Nm
-opti.subject_to( -max_torque <= u <= max_torque );
+% max_torque = 15;  % Max joint torque ±15Nm
+% opti.subject_to( -max_torque <= u <= max_torque );
 
 % Joint angle limits (set according to real robot spec)
 opti.subject_to( -pi <= x(1:NB,:) <= pi );
@@ -89,7 +90,7 @@ opti.minimize(J);
 opti.solver('ipopt', struct('ipopt', struct('print_level', 3)));
 
 
-opti_fun = opti.to_function('opti_fun', {inertias, masses}, {x, u});
+opti_fun = opti.to_function('opti_fun', {inertias, masses, lengths}, {x, u});
 % (Optional) Initial guess
 % opti.set_initial(x, 0);
 % opti.set_initial(u, 0);
