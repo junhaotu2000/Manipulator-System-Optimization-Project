@@ -58,8 +58,12 @@ xlabel('Time (s)'); ylabel('Torque (Nm)'); title('Joint Torques'); grid on;
 
 %% 3. Run PID Controller Optimization
 [RMSE_final, q] = run_pid_optimization();
+disp('Joint Position:\n');
+disp(q);
+disp('RMSE\n');
+disp(RMSE_final);
 
-fprintf('Mechanical Optimization Complete.\n');
+fprintf('Controller Optimization Complete.\n');
 
 
 
