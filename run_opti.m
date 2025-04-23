@@ -8,6 +8,13 @@ close all;
 clc;
 import casadi.*
 
+q_init = [0;  0;  0]; 
+q_goal = [pi/2;  pi/4;  0];
+% global opti_fun
+
+
+opti_fun = make_arm_opti(q_init, q_goal);
+
 %% Top-level system targets
 % System-level targets for coupling variables
 target_RMSE = 0.05;            % Tracking error target
@@ -86,7 +93,7 @@ for run_idx = 1:num_runs
     tau_max = 15;       % Maximum torque
     
     fprintf('Solving path planning subsystem for run %d...\n', run_idx);
-    plan_x_star = planner_subsystem_atc_opt(plan_targets, rotInertia_arr, mass_out, L);
+    plan_x_star = planner_subsystem_atc_opt(plan_targets, rotInertia_arr, mass_out, L, opti_fun);
     
     % Extract planned trajectory
     x = reshape(plan_x_star(1:6*N), 6, N);
@@ -284,7 +291,7 @@ model = create3DoFRobotModel(rotInertia_arr, mass_out, L/1000);
 
 % Plan trajectory
 plan_targets = best_x_star(7:9);
-plan_x_star = planner_subsystem_atc_opt(plan_targets, rotInertia_arr, mass_out, L);
+plan_x_star = planner_subsystem_atc_opt(plan_targets, rotInertia_arr, mass_out, L,opti_fun);
 
 % Extract trajectory
 x = reshape(plan_x_star(1:6*N), 6, N);
@@ -765,7 +772,7 @@ function [rotInertia_arr, mass_out, I_trans_arr] = convertLinkParams(D, t, L, ma
 end
 
 %% Path Planning Subsystem ATC Optimization
-function [x_star, f_star, phi_star, exitflag] = planner_subsystem_atc_opt(target, rotInertia_arr, mass_out, L)
+function [x_star, f_star, phi_star, exitflag] = planner_subsystem_atc_opt(target, rotInertia_arr, mass_out, L, opti_fun)
     % Inputs:
     %   target      - 3×1 vector of coupling targets: [effort; smoothness; path_penalty]
     %   rotInertia_arr - 3×3 rotational inertia matrix
@@ -835,12 +842,7 @@ function [x_star, f_star, phi_star, exitflag] = planner_subsystem_atc_opt(target
     % 
     % % Run optimization with reduced computation for multi-run
     % [z_opt, fval, exitflag] = fmincon(cost_func, z0, [], [], [], [], [], [], nonlcon_func, options);
-    q_init = [0;  0;  0]; 
-    q_goal = [pi/2;  pi/4;  0];
-    % global opti_fun
-    
-    
-    opti_fun = make_arm_opti(q_init, q_goal);
+
 
     [X, U, J] = opti_fun(target, rotInertia_arr, mass_out, L/1000);
 
