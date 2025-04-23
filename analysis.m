@@ -20,7 +20,7 @@ opti_fun = make_arm_opti();
 
 % --- Capture the outputs as they are returned by your optimizer ---
 % For example, if your function returns two outputs:
-[x_nom, u_nom] = opti_fun(rotInertia_arr', mass_out, L/1000);
+[x_nom, u_nom] = opti_fun(rotInertia_arr' * 1e-6, mass_out, L/1000);
 
 % If your optimizer also returns dual variables, use:
 % [x_nom, u_nom, lambda_nom] = opti_fun(rotInertia_arr', mass_out, L/1000);

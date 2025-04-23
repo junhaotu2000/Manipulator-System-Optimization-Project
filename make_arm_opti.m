@@ -1,4 +1,4 @@
-function opti_fun = make_arm_opti()
+function opti_fun = make_arm_opti(q_init, q_goal)
 %MAKE_ARM_OPTI makes casadi function to 
 %   Detailed explanation goes here
 import casadi.*
@@ -15,6 +15,8 @@ opti = casadi.Opti();
 inertias = opti.parameter(3,3);
 masses = opti.parameter(3);
 lengths = opti.parameter(3);
+target = opti.parameter(3);
+% target = [effort; smoothness; path_penalty];
 model = create3DoFRobotModel(inertias, masses, lengths);
 NB = model.NB;  % Number of joints
 disp(['Robot has NB = ', num2str(NB), ' joints.']);
@@ -43,8 +45,8 @@ for k = 1 : (N-1)
 end
 
 %% 5) Boundary Conditions
-q_init = [0;  0;  0]; 
-q_goal = [pi/2;  pi/4;  0];
+% q_init = [0;  0;  0]; 
+% q_goal = [pi/2;  pi/4;  0];
 
 opti.subject_to( x(1:NB,1)   == q_init );
 opti.subject_to( x(1:NB,end) == q_goal );
@@ -68,7 +70,7 @@ control_effort = sum(sum( u.^2 ));
 smoothness_penalty = sum(sum( diff(u, 1, 2).^2 ));
 
 % (c) Final velocity penalty (optional)
-end_vel_penalty = sum( x(NB+1:end, end).^2 );
+% end_vel_penalty = sum( x(NB+1:end, end).^2 );
 
 % (d) End-effector path length penalty
 %     Approximate by discrete sum of squared Euclidean distances
@@ -81,8 +83,12 @@ end
 alpha_path = 5;  % Weight on path length penalty
 
 % Combine all cost terms
-J = control_effort + smoothness_penalty + end_vel_penalty ...
+J_original = control_effort + smoothness_penalty ...
     + alpha_path * end_effector_path_length;
+r = [control_effort; smoothness_penalty; end_effector_path_length];
+J_target = sum((r - target).^2);
+
+J = J_original + 10*J_target;
 
 opti.minimize(J);
 
@@ -90,10 +96,12 @@ opti.minimize(J);
 opti.solver('ipopt', struct('ipopt', struct('print_level', 3)));
 
 
-opti_fun = opti.to_function('opti_fun', {inertias, masses, lengths}, {x, u});
+opti_fun = opti.to_function('opti_fun', {target, inertias, masses, lengths}, {x, u, J});
 % (Optional) Initial guess
 % opti.set_initial(x, 0);
 % opti.set_initial(u, 0);
+
+% fun_name = casadi_fun_to_mex(opti_fun, './', '');
 
 end
 %% =============== Compute End-Effector 3D Position ===============
@@ -131,3 +139,28 @@ function [R, p] = plux_inv(X)
     p = [ S(3,2); S(1,3); S(2,1) ];  % Unskew
 end
 
+
+
+function mex_name = casadi_fun_to_mex(casadi_fun, dir, opt_flag)
+    arguments
+        casadi_fun (1,1) casadi.Function
+        dir char
+        opt_flag = '-O3'
+    end
+
+    disp(['Compiling with ',opt_flag])
+    
+    mex_name = casadi_fun.name;
+    full_name = [dir, '/', mex_name, '.c'];
+    opts = struct('main', true, ...
+        'mex', true);
+    casadi_fun.generate(mex_name, opts);
+    if ~strcmp(dir,pwd)
+        movefile([mex_name,'.c'], dir);
+    end
+    mex(full_name, '-largeArrayDims', ['COPTIMFLAGS="',opt_flag,'"']);
+    
+    if ~strcmp(dir,pwd)
+        movefile([mex_name,'.mexa64'], dir);
+    end
+end
