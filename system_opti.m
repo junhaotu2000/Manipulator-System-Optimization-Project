@@ -56,4 +56,12 @@ plot(time_grid, U_opt(2,:), 'LineWidth', 1.5);
 plot(time_grid, U_opt(3,:), 'LineWidth', 1.5);
 xlabel('Time (s)'); ylabel('Torque (Nm)'); title('Joint Torques'); grid on;
 
+%% 3. Run PID Controller Optimization
+[RMSE_final, q] = run_pid_optimization();
+
+fprintf('Mechanical Optimization Complete.\n');
+
+
+
+
 
