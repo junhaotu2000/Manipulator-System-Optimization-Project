@@ -15,6 +15,9 @@ opti = casadi.Opti();
 inertias = opti.parameter(3,3);
 masses = opti.parameter(3);
 lengths = opti.parameter(3);
+
+start_p = opti.parameter(3);
+end_p = opti.parameter(3);
 model = create3DoFRobotModel(inertias, masses, lengths);
 NB = model.NB;  % Number of joints
 disp(['Robot has NB = ', num2str(NB), ' joints.']);
@@ -43,8 +46,8 @@ for k = 1 : (N-1)
 end
 
 %% 5) Boundary Conditions
-q_init = [0;  0;  0]; 
-q_goal = [pi/2;  pi/4;  0];
+q_init = start_p; 
+q_goal = end_p;
 
 opti.subject_to( x(1:NB,1)   == q_init );
 opti.subject_to( x(1:NB,end) == q_goal );
@@ -90,7 +93,7 @@ opti.minimize(J);
 opti.solver('ipopt', struct('ipopt', struct('print_level', 3)));
 
 
-opti_fun = opti.to_function('opti_fun', {inertias, masses, lengths}, {x, u});
+opti_fun = opti.to_function('opti_fun', {inertias, masses, lengths, start_p, end_p}, {x, u});
 % (Optional) Initial guess
 % opti.set_initial(x, 0);
 % opti.set_initial(u, 0);

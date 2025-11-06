@@ -1,8 +1,0 @@
-function casadi_fun = make_arm_opti(inertias)
-%MAKE_ARM_OPTI makes casadi function to 
-%   Detailed explanation goes here
-
-model = 
-
-end
-

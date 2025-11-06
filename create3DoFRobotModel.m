@@ -70,13 +70,13 @@ function model = create3DoFRobotModel(rotInertia_arr, mass, L)
     model.parent(2) = 1;
     model.jtype{2} = 'Rx';
     model.Xtree{2} = plux(eye(3), [0, 0, L(1)]);;
-    model.appearance.body{2} = {{'cyl', [0.05, 0, 0;-0.05, 0, 0],.05},{'cyl', [0,0,0;0,0,L(1)],0.02}};
+    model.appearance.body{2} = {{'cyl', [0.05, 0, 0;-0.05, 0, 0],.05},{'cyl', [0,0,0;0,0,L(2)],0.02}};
     model.I{2} = mcI(mass(2), [0, 0, L(2)], rotInertia{2});
 
     model.parent(3) = 2;
     model.jtype{3} = 'Rx';
     model.Xtree{3} = plux(eye(3), [0, 0, L(2)]);
-    model.appearance.body{3} = {{'cyl', [0.05, 0, 0;-0.05, 0, 0],.05},{'cyl', [0,0,0;0,0,L(1)],0.02}};
+    model.appearance.body{3} = {{'cyl', [0.05, 0, 0;-0.05, 0, 0],.05},{'cyl', [0,0,0;0,0,L(3)],0.02}};
     model.I{3} = mcI(mass(3), [0, 0, L(3)], rotInertia{3});
     
     % End-effector offset: translation along x by 0.1 m

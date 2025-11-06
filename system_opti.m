@@ -21,8 +21,8 @@ disp(mass_out);
 
 %% 2. Run Robot Planning Optimization via CasADi
 % L = mechOut.L; % Link lengths
-opti_fun = make_arm_opti(); % Create the casadi function for the optimizer
-[x, u] = opti_fun(rotInertia_arr', mass_out, L/1000);
+
+[x, u] = opti_fun(rotInertia_arr', mass_out, L/1000, [0, 5 * pi/8, -5 * pi/8], [pi, -5 * pi/8, 5 * pi/8]);
 
 X_opt = full(x);
 U_opt = full(u);
