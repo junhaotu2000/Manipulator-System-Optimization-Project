@@ -21,8 +21,8 @@ disp(mass_out);
 
 %% 2. Run Robot Planning Optimization via CasADi
 % L = mechOut.L; % Link lengths
-
-[x, u] = opti_fun(rotInertia_arr', mass_out, L/1000, [0, 5 * pi/8, -5 * pi/8], [pi, -5 * pi/8, 5 * pi/8]);
+opti_fun = make_arm_opti(); % Create the casadi function for the optimizer
+[x, u] = opti_fun(rotInertia_arr'*1e-6, mass_out, L/1000);
 
 X_opt = full(x);
 U_opt = full(u);
@@ -56,22 +56,16 @@ plot(time_grid, U_opt(2,:), 'LineWidth', 1.5);
 plot(time_grid, U_opt(3,:), 'LineWidth', 1.5);
 xlabel('Time (s)'); ylabel('Torque (Nm)'); title('Joint Torques'); grid on;
 
-% our rotational inertia is a fixed matrix
-% example: rotInertia = [[0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]; [0.02, 0.02, 0.01]];
+%% 3. Run PID Controller Optimization
+[RMSE_final, q] = run_pid_optimization();
+disp('Joint Position:\n');
+disp(q);
+disp('RMSE\n');
+disp(RMSE_final);
 
-%% 3. Run Controller Optimization
-%The controller optimization is for a single joint, so it will need to run three times.
+fprintf('Controller Optimization Complete.\n');
 
-I_const = 0.02.*ones(length(U_opt(1,:)));
 
-%Joint 1
-[RMSE_Final_1, q_1] = run_pid_optimization(I_const, U_opt(1,:), Q_opt(1,:));
 
-%Joint 2
-[RMSE_Final_2, q_2] = run_pid_optimization(I_const, U_opt(2,:), Q_opt(2,:));
 
-%Joint 3
-[RMSE_Final_3, q_3] = run_pid_optimization(I_const, U_opt(3,:), Q_opt(3,:));
 
-RMSE_Final = [RMSE_Final_1; RMSE_Final_2; RMSE_Final_3]; %RMSE Tracking error 3xN array [joint 1, joint 2, joint 3]
-q = [q_1; q_2; q_3]; %Angular position 3xN array [joint 1, joint 2, joint 3]
